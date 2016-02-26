@@ -1,15 +1,17 @@
 #!/usr/bin/perl -w
 #
-# $Id: mb2md.pl,v 1.26 2004/03/28 00:09:46 juri Exp $
+# mb2md.pl  Converts Mbox mailboxes to Maildir format.
 #
-# mb2md-3.20.pl      Converts Mbox mailboxes to Maildir format.
+# Version:  Based on 3.20 but from now on check git instead for info.
 #
 # Public domain.
 #
-# currently maintained by:
+# previously maintained by:
 # Juri Haberland <juri@koschikode.com>
 # initially wrote by:
 # Robin Whittle
+#
+# (G.Andersson: Not maintained since 2006 what I can tell...)
 #
 # This script's web abode is
 # http://batleth.sapienti-sat.org/projects/mb2md/ . For a changelog see
