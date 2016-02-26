@@ -439,6 +439,7 @@ if (defined($opts{m}))
 # see if the user has specified a source directory
 elsif (defined($opts{s}))
 {
+      printf "-s given\n";
 	# if opts{s} doesn't start with a "/" then
 	# it is a subdir of the users $home
 	# if it does start with a "/" then
@@ -448,6 +449,7 @@ elsif (defined($opts{s}))
 	# check if the given source is a mbox file
 	if (-f $opts{s})
 	{
+      printf "Is it a s?\n";
 		$mbfile = $opts{s};
 	}
 
@@ -457,11 +459,13 @@ elsif (defined($opts{s}))
 		$mbroot = $opts{s};
 		# get rid of trailing /'s
 		$mbroot =~ s/\/$//;
+      printf "Is it a dir?\n";
 
 		# check if we have a specified sub directory,
 		# otherwise the sub directory is '.'
 		if (defined($opts{f}))
 		{
+      printf "YES its a file\n";
 			$mbdir = $opts{f};
 			# get rid of trailing /'s
 			$mbdir =~ s/\/$//;
@@ -1034,11 +1038,15 @@ sub convert
                             # Mbox file.
 
                     close (OUT);
-		    if ($messagefn ne '') {
-			my $t = str2time($receivedate);
-			utime $t, $t, $messagefn;
-		    }
-                }
+                    if ($messagefn ne '') {
+# GAN FIX
+                       $receivedate =~ s/.*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/\1/;
+                       print "Checking date $receivedate\n";
+# GAN FIX
+                       my $t = str2time($receivedate);
+                       utime $t, $t, $messagefn;
+                    }
+                 }
 
                             # Because we opened the Mbox file without any
                             # variable, I think this means that we have its
@@ -1433,9 +1441,13 @@ sub convert
 
         close(OUT);
         if ($messagefn ne '') {
-	    my $t = str2time($receivedate);
-	    utime $t, $t, $messagefn;
-	}
+# GAN FIX
+                       $receivedate =~ s/.*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/\1/;
+                       print "Checking date $receivedate\n";
+# GAN FIX
+           my $t = str2time($receivedate);
+           utime $t, $t, $messagefn;
+        }
 
                             # After all the messages have been
                             # converted, check to see if the
