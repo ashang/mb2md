@@ -11,12 +11,13 @@
 # initially wrote by:
 # Robin Whittle
 #
-# This script's web abode is http://batleth.sapienti-sat.org/projects/mb2md/ .
-# For a changelog see http://batleth.sapienti-sat.org/projects/mb2md/changelog.txt
+# This script's web abode is
+# http://batleth.sapienti-sat.org/projects/mb2md/ . For a changelog see
+# http://batleth.sapienti-sat.org/projects/mb2md/changelog.txt
 #
-# The Mbox -> Maildir inner loop is based on  qmail's script mbox2maildir, which
-# was kludged by Ivan Kohler in 1997 from convertandcreate (public domain)
-# by Russel Nelson.  Both these convert a single mailspool file.
+# The Mbox -> Maildir inner loop is based on  qmail's script mbox2maildir,
+# which was kludged by Ivan Kohler in 1997 from convertandcreate (public
+# domain) by Russel Nelson.  Both these convert a single mailspool file.
 #
 # The qmail distribution has a maildir2mbox.c program.
 #
@@ -30,42 +31,40 @@
 #   http://www.inter7.com/courierimap/
 #
 # This is intended to automate the conversion of the old
-# /var/spool/mail/blah file - with one call of this script - and to
-# convert one or more mailboxes in a specifed directory with separate
-# calls with other command line arguments.
+# /var/spool/mail/blah file - with one call of this script - and to convert
+# one or more mailboxes in a specifed directory with separate calls with
+# other command line arguments.
 #
 # Run this as the user - in these examples "blah".
 
 # This version supports conversion of:
 #
 #    Date    The date-time in the "From " line of the message in the
-#            Mbox format is the date when the message was *received*.
-#            This is transformed into the date-time of the file which
-#            contains the message in the Maildir mailbox.
+#            Mbox format is the date when the message was *received*. This
+#            is transformed into the date-time of the file which contains
+#            the message in the Maildir mailbox.
 #
-#            This relies on the Date::Parse perl module and the utime
-#            perl function.
+#            This relies on the Date::Parse perl module and the utime perl
+#            function.
 #
-#            The script tries to cope with errant forms of the
-#            Mbox "From " line which it may encounter, but if
-#            there is something really screwy in a From line,
-#            then perhaps the script will fail when "touch"
-#            is given an invalid date.  Please report the
-#            exact nature of any such "From " line!
-#
+#            The script tries to cope with errant forms of the Mbox "From "
+#            line which it may encounter, but if there is something really
+#            screwy in a From line, then perhaps the script will fail when
+#            "touch" is given an invalid date.  Please report the exact
+#            nature of any such "From " line!
 #
 #   Flagged
 #   Replied
 #   Read = Seen
 #   Tagged for Deletion
 #
-#            In the Mbox message, flags for these are found in the
-#            "Status: N" or "X-Status: N" headers, where "N" is 0
-#            or more of the following characters in the left column.
+#            In the Mbox message, flags for these are found in the "Status:
+#            N" or "X-Status: N" headers, where "N" is 0 or more of the
+#            following characters in the left column.
 #
-#            They are converted to characters in the right column,
-#            which become the last characters of the file name,
-#            following the ":2," which indicates IMAP message status.
+#            They are converted to characters in the right column, which
+#            become the last characters of the file name, following the
+#            ":2," which indicates IMAP message status.
 #
 #
 #                F -> F      Flagged
@@ -73,10 +72,9 @@
 #                R -> S      Read = Seen
 #                D -> T      Tagged for Deletion (Trash)
 #
-#            This is based on the work of Philip Mak who wrote a
-#            completely separate Mbox -> Maildir converter called
-#            perfect_maildir and posted it to the Mutt-users mailing
-#            list on 25 December 2001:
+#            This is based on the work of Philip Mak who wrote a completely
+#            separate Mbox -> Maildir converter called perfect_maildir and
+#            posted it to the Mutt-users mailing list on 25 December 2001:
 #
 #               http://www.mail-archive.com/mutt-users@mutt.org/msg21872.html
 #
@@ -88,10 +86,10 @@
 #
 #       7654321.000123.mbox:2,xxx
 #
-#   Where "7654321" is the Unix time in seconds when the script was
-#   run and "000123" is the six zeroes padded message number as
-#   messages are converted from the Mbox file.  "xxx" represents zero or
-#   more of the above flags F, R, S or T.
+#   Where "7654321" is the Unix time in seconds when the script was run and
+#   "000123" is the six zeroes padded message number as messages are
+#   converted from the Mbox file.  "xxx" represents zero or more of the
+#   above flags F, R, S or T.
 #
 #
 # ---------------------------------------------------------------------
@@ -114,72 +112,69 @@
 #                a run without "-c" first and only use it if you are certain,
 #                that the mbox in question really needs the "-c" option
 #
-#  -m            If this is used then the source will
-#                be the single mailbox at /var/spool/mail/blah for
-#                user blah and the destination mailbox will be the
-#                "destdir" mailbox itself.
+#  -m            If this is used then the source will be the single mailbox
+#                at /var/spool/mail/blah for user blah and the destination
+#                mailbox will be the "destdir" mailbox itself.
 #
 #
 #  -s source     Directory or file relative to the user's home directory,
-#                which is where the the "somefolders" directories are located.
-#                Or if starting with a "/" it is taken as a
+#                which is where the the "somefolders" directories are
+#                located. Or if starting with a "/" it is taken as a
 #                absolute path, e.g. /mnt/oldmail/user
 #
 #                or
 #
-#                A single mbox file which will be converted to
-#                the destdir.
+#                A single mbox file which will be converted to the destdir.
 #
-#  -R		 If defined, do not skip directories found in a mailbox 
-#		 directory, but runs recursively into each of them, 
-# 		 creating all wanted folders in Maildir.
-#		 Incompatible with '-f'
+#  -R            If defined, do not skip directories found in a mailbox
+#                uj0 directory, but runs recursively into each of them,
+#                creating all wanted folders in Maildir. Incompatible with '-f'
 #
 #  -f somefolder Directories, relative to "sourcedir" where the Mbox files
-#                are. All mailboxes in the "sourcedir"
-#                directory will be converted and placed in the
-#                "destdir" directory.  (Typically the Inbox directory
-#                which in this instance is also functioning as a
-#                folder for other mailboxes.)
+#                are. All mailboxes in the "sourcedir" directory will be
+#                converted and placed in the "destdir" directory.
+#                (Typically the Inbox directory which in this instance is
+#                also functioning as a folder for other mailboxes.)
 #
-#                The "somefolder" directory
-#                name will be encoded into the new mailboxes' names.
-#                See the examples below.
+#                The "somefolder" directory name will be encoded into the
+#                new mailboxes' names. See the examples below.
 #
-#                This does not save an UW IMAP dummy message file
-#                at the start of the Mbox file.  Small changes
-#                in the code could adapt it for looking for
-#                other distinctive patterns of dummy messages too.
+#                This does not save an UW IMAP dummy message file at the
+#                start of the Mbox file.  Small changes in the code could
+#                adapt it for looking for other distinctive patterns of
+#                dummy messages too.
 #
 #                Don't let the source directory you give as "somefolders"
-#                contain any "."s in its name, unless you want to
-#                create subfolders from the IMAP user's point of
-#                view.  See the example below.
+#                contain any "."s in its name, unless you want to create
+#                subfolders from the IMAP user's point of view.  See the
+#                example below.
 #
 #                Incompatible with '-f'
 #
 #
 #  -d destdir    Directory where the Maildir format directories will be created.
 #                If not given, then the destination will be ~/Maildir .
-#                Typically, this is what the IMAP server sees as the
-#                Inbox and the folder for all user mailboxes.
-#                If this begins with a '/' the path is considered to be
-#                absolute, otherwise it is relative to the users
-#                home directory.
+#                Typically, this is what the IMAP server sees as the Inbox
+#                and the folder for all user mailboxes. If this begins with
+#                a '/' the path is considered to be absolute, otherwise it
+#                is relative to the users home directory.
 #
-#  -r strip_ext  If defined this extension will be stripped from
-#                the original mailbox file name before creating
-#                the corresponding maildir. The extension must be
-#                given without the leading dot ("."). See the example below.
+#  -r strip_ext  If defined this extension will be stripped from the
+#                original mailbox file name before creating the corresponding
+#                maildir. The extension must be given without the leading
+#                dot ("."). See the example below.
 #
 #  -l WU-file    File containing the list of subscribed folders.  If
 #                migrating from WU-IMAP the list of subscribed folders will
-#                be found in the file called .mailboxlist in the users
-#                home directory.  This will convert all subscribed folders
-#                for a single user:
+#                be found in the file called .mailboxlist in the users home
+#                directory.  This will convert all subscribed folders for a
+#                single user:
+#
 #                /bin/mb2md -s mail -l .mailboxlist -R -d Maildir
+#
 #                and for all users in a directory as root you can do the
 #                following:
+#
 #                for i in *; do echo $i;su - $i -c "/bin/mb2md -s mail -l .mailboxlist -R -d Maildir";done
 #
 #
@@ -263,17 +258,16 @@
 #             | duey -------
 #             | louie ------
 #
-# Note that although ~/Maildir/.xxx/ and ~/Maildir/.yyyy may appear
-# as folders to the IMAP client the above commands to not generate
-# any Maildir folders of these names.  These are simply elements
-# of the names of other Maildir directories. (if you used '-R', they 
-# whill be able to act as normal folders, containing messages AND folders)
+# Note that although ~/Maildir/.xxx/ and ~/Maildir/.yyyy may appear as
+# folders to the IMAP client the above commands to not generate any Maildir
+# folders of these names.  These are simply elements of the names of other
+# Maildir directories. (if you used '-R', they whill be able to act as
+# normal folders, containing messages AND folders)
 #
-# With a separate run of this script, using just the "-s" option
-# without "-f" nor "-R", it would be possible to create mailboxes which
-# appear at the same location as far as the IMAP client is
-# concerned.  By having Mbox mailboxes in some directory:
-# ~/oldmail/nnn/ of the form:
+# With a separate run of this script, using just the "-s" option without
+# "-f" nor "-R", it would be possible to create mailboxes which appear at
+# the same location as far as the IMAP client is concerned.  By having Mbox
+# mailboxes in some directory: ~/oldmail/nnn/ of the form:
 #
 #     /home/blah/oldmail/nn/xxxx
 #     /home/blah/oldmail/nn/yyyyy
@@ -287,37 +281,36 @@
 #    /home/blah/Maildir/.xxx/
 #    /home/blah/Maildir/.yyyy/
 #
-# Then what used to be the xxx and yyyy folders now function as
-# mailboxes too.  Netscape 4.77 needed to be put to sleep and given ECT
-# to recognise this - deleting the contents of (Win2k example):
+# Then what used to be the xxx and yyyy folders now function as mailboxes
+# too.  Netscape 4.77 needed to be put to sleep and given ECT to recognise
+# this - deleting the contents of (Win2k example):
 #
 #    C:\Program Files\Netscape\Users\uu\ImapMail\aaa.bbb.ccc\
 #
 # where "uu" is the user and "aaa.bbb.ccc" is the IMAP server
 #
 # I often find that deleting all this directory's contents, except
-# "rules.dat", forces Netscape back to reality after its IMAP innards
-# have become twisted.  Then maybe use File > Subscribe - but this
-# seems incapable of subscribing to folders.
+# "rules.dat", forces Netscape back to reality after its IMAP innards have
+# become twisted.  Then maybe use File > Subscribe - but this seems
+# incapable of subscribing to folders.
 #
-# For Outlook Express, select the mail server, then click the
-# "IMAP Folders" button and use "Reset list".  In the "All"
-# window, select the mailboxes you want to see in normal
-# usage.
+# For Outlook Express, select the mail server, then click the "IMAP
+# Folders" button and use "Reset list".  In the "All" window, select the
+# mailboxes you want to see in normal usage.
 #
+# This script did not recurse subdirectories or delete old mailboxes,
+# before addition of the '-R' parameter :)
 #
-# This script did not recurse subdirectories or delete old mailboxes, before addition of the '-R' parameter :)
-#
-# Be sure not to be accessing the Mbox mailboxes while running this
-# script.  It does not attempt to lock them.  Likewise, don't run two
-# copies of this script either.
+# Be sure not to be accessing the Mbox mailboxes while running this script.
+# It does not attempt to lock them.  Likewise, don't run two copies of this
+# script either.
 #
 #
 # Trickier usage . . .
 # ====================
 #
-# If you have a bunch of mailboxes in a directory ~/oldmail/doors/
-# and you want them to appear in folders such as:
+# If you have a bunch of mailboxes in a directory ~/oldmail/doors/ and you
+# want them to appear in folders such as:
 #
 # ~/Maildir/.music.bands.doors.Jim
 # ~/Maildir/.music.bands.doors.John
@@ -347,35 +340,32 @@
 #
 #
 # Stripping mailbox extensions:
-# ============================= 
+# =============================
 #
-# If you want to convert mailboxes that came for example from
-# a Windows box than you might want to strip the extension of
-# the mailbox name so that it won't create a subfolder in your
-# mail clients view.
+# If you want to convert mailboxes that came for example from a Windows box
+# than you might want to strip the extension of the mailbox name so that it
+# won't create a subfolder in your mail clients view.
 #
 # Example:
-# You have several mailboxes named Trash.mbx, Sent.mbx, Drafts.mbx
-# If you don't strip the extension "mbx" you will get the following
-# hierarchy:
+# You have several mailboxes named Trash.mbx, Sent.mbx, Drafts.mbx If you
+# don't strip the extension "mbx" you will get the following hierarchy:
 #
 # Inbox
 #      |
-#       - Trash 
+#       - Trash
 #      |       | mbx
 #      |
-#       - Sent 
+#       - Sent
 #      |       | mbx
 #      |
-#       - Drafts 
+#       - Drafts
 #              | mbx
 #
 # This is more than ugly!
 # Just use:
 #   mb2md -s oldmail -r mbx
 #
-# Note: don't specify the dot! It will be stripped off
-# automagically ;)
+# Note: don't specify the dot! It will be stripped off automagically ;)
 #
 #------------------------------------------------------------------------------
 
@@ -405,12 +395,12 @@ my ($name, $passwd, $uid, $gid, $quota, $comment, $gcos, $homedir, $shell) = get
 
 # Get arguments and determine source
 # and target directories.
-my $mbroot = undef;	# this is the base directory for the mboxes
-my $mbdir = undef;	# this is an mbox dir relative to the $mbroot
-my $mbfile = undef;	# this is an mbox file
+my $mbroot = undef;  # this is the base directory for the mboxes
+my $mbdir = undef;   # this is an mbox dir relative to the $mbroot
+my $mbfile = undef;  # this is an mbox file
 my $dest = undef;
 my $strip_ext = undef;
-my $use_cl = undef;	# defines whether we use the Content-Length: header if present
+my $use_cl = undef;  # defines whether we use the Content-Length: header if present
 
 # if option "-c" is given, we use the Content-Length: header if present
 # dangerous! may be unreliable, as the whole CL stuff is a bad idea
@@ -443,7 +433,7 @@ elsif (defined($opts{s}))
    # it is a subdir of the users $home
    # if it does start with a "/" then
    # let's take $mbroot as a absolut path
-   $opts{s} = "$homedir/$opts{s}" if ($opts{s} !~ /^\//); 
+   $opts{s} = "$homedir/$opts{s}" if ($opts{s} !~ /^\//);
 
    # check if the given source is a mbox file
    if (-f $opts{s})
@@ -572,7 +562,7 @@ else
          print "Skipping $mbroot/$sourcefile : not a mbox file\n";
          next;
       }
-      else 
+      else
       {
          &convertit($sourcefile,"");
       }
@@ -589,8 +579,8 @@ exit 0;
 
 # The isamailboxfile function
 # ----------------------
-# 
-# Here we check if the file is a mailbox file, not an address-book or 
+#
+# Here we check if the file is a mailbox file, not an address-book or
 # something else.
 # If file is empty, we say it is a mbox, to create it empty.
 #
@@ -614,7 +604,7 @@ sub isamailboxfile {
 # The convertit function
 # -----------------------
 #
-# This function creates all subdirs in maildir, and calls convert() 
+# This function creates all subdirs in maildir, and calls convert()
 # for each mbox file.
 # Yes, it becomes the 'main loop' :)
 sub convertit
@@ -661,7 +651,7 @@ sub convertit
          print("Sub: $_\n");
          print("convertit($_,\"$oldpath/$dir\")\n");
          &convertit($_,"$oldpath/$dir");
-      } 
+      }
    } else {
       # Source file verifs ....
       #
@@ -685,7 +675,7 @@ sub convertit
 # The maildirmake function
 # ------------------------
 #
-# It does the same thing that the maildirmake binary that 
+# It does the same thing that the maildirmake binary that
 # comes with courier-imap distribution
 #
 sub maildirmake
@@ -728,7 +718,7 @@ sub inlist
    return $valid;
 }
 
-# 
+#
 
 # The convert function
 # ---------------------
@@ -1004,7 +994,7 @@ sub convert
 
       if ( /^From /
          && $previous_line_was_empty
-         && (!defined $contentlength) 
+         && (!defined $contentlength)
       )
       {
          # We are reading the "From " line which has an
