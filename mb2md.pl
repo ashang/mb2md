@@ -606,9 +606,8 @@ sub isamailboxfile {
 # The convertit function
 # -----------------------
 #
-# This function creates all subdirs in maildir, and calls convert()
-# for each mbox file.
-# Yes, it becomes the 'main loop' :)
+# This function creates all subdirs in maildir, and calls convert() for
+# each mbox file. Yes, it becomes the 'main loop' :)
 sub convertit
 {
    # Get subdir as argument
@@ -616,8 +615,8 @@ sub convertit
 
    $oldpath =~ s/\/\///;
 
-   # Skip files beginning with '.' since they are
-   # not normally mbox files nor dirs (includes '.' and '..')
+   # Skip files beginning with '.' since they are not normally mbox files
+   # nor dirs (includes '.' and '..')
    if ($dir =~ /^\./)
    {
       print "Skipping $dir : name begins with a '.'\n";
@@ -626,9 +625,8 @@ sub convertit
    my $destinationdir = $dir;
    my $temppath = $oldpath;
 
-   # We don't want to have .'s in the $targetfile file
-   # name because they will become directories in the
-   # Maildir. Therefore we convert them to _'s
+   # We don't want to have .'s in the $targetfile file name because they
+   # will become directories in the Maildir. Therefore we convert them to _'s
    $temppath =~ s/\./\_/g;
    $destinationdir =~ s/\./\_/g;
 
@@ -656,7 +654,7 @@ sub convertit
       }
    } else {
       # Source file verifs ....
-      #
+
       return if(defined($opts{l}) && !inlist("$oldpath/$dir",@flist));
 
       if (!isamailboxfile("$mbroot/$oldpath/$dir"))
@@ -677,8 +675,8 @@ sub convertit
 # The maildirmake function
 # ------------------------
 #
-# It does the same thing that the maildirmake binary that
-# comes with courier-imap distribution
+# It does the same thing that the maildirmake binary that comes with
+# courier-imap distribution
 #
 sub maildirmake
 {
@@ -725,8 +723,8 @@ sub inlist
 # The convert function
 # ---------------------
 #
-# This function does the down and dirty work of
-# actually converting the mbox to a maildir
+# This function does the down and dirty work of actually converting the
+# mbox to a maildir
 #
 sub convert
 {
@@ -738,8 +736,8 @@ sub convert
 
    # create the directories for the new maildir
    #
-   # if it is the root maildir (ie. converting the inbox)
-   # these already exist but thats not a big issue
+   # if it is the root maildir (ie. converting the inbox) these already
+   # exist but thats not a big issue
 
    &maildirmake($maildir);
 
@@ -747,12 +745,10 @@ sub convert
 
    chdir "$maildir" ;
 
-   # Converts a Mbox to multiple files
-   # in a Maildir.
-   # This is adapted from mbox2maildir.
-   #
-   # Open the Mbox mailbox file.
+   # Converts a Mbox to multiple files in a Maildir. This is adapted from
+   # mbox2maildir.
 
+   # Open the Mbox mailbox file.
 
    if (sysopen(MBOX, "$mbox", O_RDONLY))
    {
@@ -763,139 +759,103 @@ sub convert
       die("Fatal: unable to open input mailbox file: $mbox ! \n");
    }
 
-   # This loop scans the input mailbox for
-   # a line starting with "From ".  The
-   # "^" before it is pattern-matching
-   # lingo for it being at the start of a
-   # line.
+   # This loop scans the input mailbox for a line starting with "From ".
+   # The "^" before it is pattern-matching lingo for it being at the start
+   # of a line.
    #
-   # Each email in Mbox mailbox starts
-   # with such a line, which is why any
-   # such line in the body of the email
-   # has to have a ">" put in front of it.
+   # Each email in Mbox mailbox starts with such a line, which is why any
+   # such line in the body of the email has to have a ">" put in front of
+   # it.
    #
-   # This is not required in a Maildir
-   # mailbox, and some majik below
-   # finds any such quoted "> From"s and
-   # gets rid of the "> " quote.
+   # This is not required in a Maildir mailbox, and some majik below finds
+   # any such quoted "> From"s and gets rid of the "> " quote.
    #
-   # Each email is put in a file
-   # in the cur/ subdirectory with a
-   # name of the form:
+   # Each email is put in a file in the cur/ subdirectory with a name of
+   # the form:
    #
    #    nnnnnnnnn.cccc.mbox:2,XXXX
    #
    # where:
-   #    "nnnnnnnnn" is the Unix time since
-   #       1970 when this script started
-   #       running, incremented by 1 for
-   #       every email.  This is to ensure
-   #       unique names for each message
-   #       file.
+   #    "nnnnnnnnn" is the Unix time since 1970 when this script started
+   #    running, incremented by 1 for every email.  This is to ensure
+   #    unique names for each message file.
    #
-   #    ".cccc" is the message count of
-   #       messages from this mbox.
+   #    ".cccc" is the message count of messages from this mbox.
    #
-   #    ".mbox" is just to indicate that
-   #       this message was converted from
-   #       an Mbox mailbox.
+   #    ".mbox" is just to indicate that this message was converted from an
+   #    Mbox mailbox.
    #
-   #    ":2," is the start of potentially
-   #       multiple IMAP flag characters
-   #       "XXXX", but may be followed by
-   #       nothing.
+   #    ":2," is the start of potentially multiple IMAP flag characters
+   #    "XXXX", but may be followed by nothing.
    #
-   # This is sort-of  compliant with
-   # the Maildir naming conventions
+   # This is sort-of  compliant with the Maildir naming conventions
    # specified at:
    #
    # http://www.qmail.org/man/man5/maildir.html
    #
-   # This approach does not involve the
-   # process ID or the hostname, but it is
-   # probably good enough.
+   # This approach does not involve the process ID or the hostname, but it
+   # is probably good enough.
    #
-   # When the IMAP server looks at this
-   # mailbox, it will move the files to
-   # the cur/ directory and change their
-   # names as it pleases.  In the case
-   # of Courier IMAP, the names will
-   # become like:
+   # When the IMAP server looks at this mailbox, it will move the files to
+   # the cur/ directory and change their names as it pleases.  In the case
+   # of Courier IMAP, the names will become like:
    #
    #   995096541.25351.mbox:2,S
    #
-   # with 25351 being Courier IMAP's
-   # process ID.  The :2, is the start
-   # of the flags, and the "S" means
-   # that this one has been seen by
-   # the user.  (But is this the same
-   # meaning as the user actually
-   # having opened the message to see
-   # its contents, rather than just the
-   # IMAP server having been asked to
-   # list the message's Subject etc.
-   # so the client could list it in the
-   # visible Inbox?)
+   # with 25351 being Courier IMAP's process ID.  The :2, is the start of
+   # the flags, and the "S" means that this one has been seen by the user.
+   # (But is this the same meaning as the user actually having opened the
+   # message to see its contents, rather than just the IMAP server having
+   # been asked to list the message's Subject etc. so the client could list
+   # it in the visible Inbox?)
    #
-   # This contrasts with a message
-   # created by Courier IMAP, say with
-   # a message copy, which is like:
+   # This contrasts with a message created by Courier IMAP, say with a
+   # message copy, which is like:
    #
    #   995096541.25351.zair,S=14285:2,S
    #
-   # where ",S=14285" is the size of the
-   # message in bytes.
+   # where ",S=14285" is the size of the message in bytes.
    #
-   # Courier Maildrop's names are similar
-   # but lack the ":2,XXXX" flags . . .
-   # except for my modified Maildrop
-   # which can deliver them with a
-   # ":2,T" - flagged for deletion.
+   # Courier Maildrop's names are similar but lack the ":2,XXXX" flags . .
+   # . except for my modified Maildrop which can deliver them with a ":2,T"
+   # - flagged for deletion.
    #
-   # I have extended the logic of the
-   # per-message inner loop to stop
-   # saving a file for a message with:
+   # I have extended the logic of the per-message inner loop to stop saving
+   # a file for a message with:
    #
    # Subject: DON'T DELETE THIS MESSAGE -- FOLDER INTERNAL DATA
    #
-   # This is the dummy message, always
-   # at the start of an Mbox format
-   # mailbox file - and is put there
-   # by UW IMAPD.  Since quite a few
-   # people will use this for
-   # converting from a UW system,
-   # I figure it is worth it.
+   # This is the dummy message, always at the start of an Mbox format
+   # mailbox file - and is put there by UW IMAPD.  Since quite a few people
+   # will use this for converting from a UW system, I figure it is worth
+   # it.
    #
-   # I will not save any such message
-   # file for the dummy message.
+   # I will not save any such message file for the dummy message.
    #
    # Plan
    # ----
    #
-   # We want to read the entire Mbox file, whilst
-   # going through a loop for each message we find.
+   # We want to read the entire Mbox file, whilst going through a loop for
+   # each message we find.
    #
-   # We want to read all the headers of the message,
-   # starting with the "From " line.   For that "From "
-   # line we want to get a date.
+   # We want to read all the headers of the message, starting with the
+   # "From " line.   For that "From " line we want to get a date.
    #
-   # For all other header lines, we want to store them
-   # in $headers whilst parsing them to find:
+   # For all other header lines, we want to store them in $headers whilst
+   # parsing them to find:
    #
    #   1 - Any flags in the "Status: " or "X-Status: " or
    #       "X-Mozilla-Status: " lines.
    #
    #   2 - A subject line indicating this is the dummy message
-   #       at the start (typically, but not necessarily) of
-   #       the Mbox.
+   #       at the start (typically, but not necessarily) of the Mbox.
    #
-   # Once we reach the end of the headers, we will crunch any
-   # flags we found to create a file name.  Then, unless this is
-   # the dummy message we create that file and write all the
-   # headers to it.
+   # Once we reach the end of the headers, we will crunch any flags we
+   # found to create a file name.  Then, unless this is the dummy message
+   # we create that file and write all the headers to it.
    #
-   # Then we continue reading the Mbox, converting ">From " to
-   # "From " and writing it to the file, until we reach one of:
+   # Then we continue reading the Mbox, converting ">From " to "From " and
+   # writing it to the file, until we reach one of:
    #
    #   1 - Another "From " line (indicating the start of another
    #       message).
@@ -904,12 +864,11 @@ sub convert
    #
    #   2 - The end of the Mbox.
    #
-   # In the former case, which we detect at the start of the loop
-   # we need to close the file and touch it to alter its date-time.
+   # In the former case, which we detect at the start of the loop we need
+   # to close the file and touch it to alter its date-time.
    #
-   # In the later case, we also need to close the file and touch
-   # it to alter its date-time - but this is beyond the end of the
-   # loop.
+   # In the later case, we also need to close the file and touch it to
+   # alter its date-time - but this is beyond the end of the loop.
 
 
    # Variables
@@ -917,37 +876,31 @@ sub convert
 
    my $messagecount = 0;
 
-   # For generating unique filenames for
-   # each message.  Initialise it here with
-   # numeric time in seconds since 1970.
+   # For generating unique filenames for each message.  Initialise it here
+   # with numeric time in seconds since 1970.
    my $unique = time;
 
-   # Name of message file to delete if we found that
-   # it was created by reading the Mbox dummy message.
-
+   # Name of message file to delete if we found that it was created by
+   # reading the Mbox dummy message.
    my $deletedummy = '';
 
-   # To store the complete "From (address) (date-time)
-   # which delineates the start of each message
-   # in the Mbox
+   # To store the complete "From (address) (date-time) which delineates the
+   # start of each message in the Mbox
    my $fromline = '';
 
 
-   # Set to 1 when we are reading the header lines,
-   # including the "From " line.
-   #
-   # 0 means we are reading the message body and looking
-   # for another "From " line.
-
+   # Set to 1 when we are reading the header lines, including the "From "
+   # line.
+   # 0 means we are reading the message body and looking for another "From
+   # " line.
    my $inheaders = 0;
 
-   # Variable to hold all headers (apart from
-   # the first line "From ...." which is not
-   # part of the message itself.
+   # Variable to hold all headers (apart from the first line "From ...."
+   # which is not part of the message itself.
    my $headers = '';
 
-   # Variable to hold the accumulated characters
-   # we find in header lines of the type:
+   # Variable to hold the accumulated characters we find in header lines of
+   # the type:
    #
    #    Status:
    #    X-Status:
@@ -958,14 +911,10 @@ sub convert
    # To build the file name for the message in.
    my $messagefn = '';
 
-
-   # The date string from the "From " line of each
-   # message will be written here - and used by
-   # touch to alter the date-time of each message
-   # file.  Put non-date text here to make it
-   # spit the dummy if my code fails to find a
-   # date to write into this.
-
+   # The date string from the "From " line of each message will be written
+   # here - and used by touch to alter the date-time of each message file.
+   # Put non-date text here to make it spit the dummy if my code fails to
+   # find a date to write into this.
    my $receivedate = 'Bogus';
 
    # The subject of the message
@@ -973,21 +922,18 @@ sub convert
 
    my $previous_line_was_empty = 1;
 
-   # We record the message start line here, for error
-   # reporting.
+   # We record the message start line here, for error reporting.
    my $startline;
 
-   # If defined, we use this as the number of bytes in the
-   # message body rather than looking for a /^From / line.
+   # If defined, we use this as the number of bytes in the message body
+   # rather than looking for a /^From / line.
    my $contentlength;
 
-   # A From lines can either occur as the first
-   # line of a file, or after an empty line.
-   # Most mail systems will quote all From lines
-   # appearing in the message, but some will only
-   # do it when necessary.
-   # Since we initialise the variable to true,
-   # we don't need to check for beginning of file.
+   # A From lines can either occur as the first line of a file, or after an
+   # empty line. Most mail systems will quote all From lines appearing in
+   # the message, but some will only do it when necessary. Since we
+   # initialise the variable to true, we don't need to check for beginning
+   # of file.
 
    while(<MBOX>)
    {
@@ -999,10 +945,9 @@ sub convert
          && (!defined $contentlength)
       )
       {
-         # We are reading the "From " line which has an
-         # email address followed by a receive date.
-         # Turn on the $inheaders flag until we reach
-         # the end of the headers.
+         # We are reading the "From " line which has an email address
+         # followed by a receive date. Turn on the $inheaders flag until we
+         # reach the end of the headers.
 
          $inheaders = 1;
 
@@ -1010,19 +955,17 @@ sub convert
 
          $startline = $.;
 
-         # If this is not the first run through the loop
-         # then this means we have already been working
-         # on a message.
+         # If this is not the first run through the loop then this means we
+         # have already been working on a message.
 
          if ($messagecount > 0)
          {
-            # If so, then close that message file and then
-            # use utime to change its date-time.
+            # If so, then close that message file and then use utime to
+            # change its date-time.
             #
-            # Note this code should be duplicated to do
-            # the same thing at the end of the while loop
-            # since we must close and touch the final message
-            # file we were writing when we hit the end of the
+            # Note this code should be duplicated to do the same thing at
+            # the end of the while loop since we must close and touch the
+            # final message file we were writing when we hit the end of the
             # Mbox file.
 
             close (OUT);
@@ -1036,14 +979,13 @@ sub convert
             }
          }
 
-         # Because we opened the Mbox file without any
-         # variable, I think this means that we have its
-         # current line in Perl's default variable "$_".
-         # So all sorts of pattern matching magic works
+         # Because we opened the Mbox file without any variable, I think
+         # this means that we have its current line in Perl's default
+         # variable "$_". So all sorts of pattern matching magic works
          # directly on it.
 
-         # We are currently reading the first line starting with
-         # "From " which contains the date we want.
+         # We are currently reading the first line starting with "From "
+         # which contains the date we want.
          #
          # This will be of the form:
          #
@@ -1051,65 +993,58 @@ sub convert
          #
          # at least with UW-IMAP.
          #
-         # However, I did find a nasty exception to this in my
-         # tests, of the form:
+         # However, I did find a nasty exception to this in my tests, of
+         # the form:
          #
          #   "bounce-MusicNewsletter 5-rw=test.org"@announce2.mp3.com
          #
-         # This makes it trickier to get rid of the email address,
-         # but I did find a way.  I can't rule out that there would
-         # be some address like this with an "@" in the quoted
-         # portion too.
+         # This makes it trickier to get rid of the email address, but I
+         # did find a way.  I can't rule out that there would be some
+         # address like this with an "@" in the quoted portion too.
          #
-         # Unfortunately, testing with an old Inbox Mbox file,
-         # I also found an instance where the email address
-         # had no @ sign at all.  It was just an email
-         # account name, with no host.
+         # Unfortunately, testing with an old Inbox Mbox file, I also found
+         # an instance where the email address had no @ sign at all.  It
+         # was just an email account name, with no host.
          #
-         # I could search for the day of the week.  If I skipped
-         # at least one word of non-whitespace (1 or more contiguous
-         # non-whitespace characters) then searched for a day of
-         # the week, then I should be able to avoid almost
-         # every instance of a day of the week appearing in
-         # the email address.
+         # I could search for the day of the week.  If I skipped at least
+         # one word of non-whitespace (1 or more contiguous non-whitespace
+         # characters) then searched for a day of the week, then I should
+         # be able to avoid almost every instance of a day of the week
+         # appearing in the email address.
          #
-         # Do I need a failsafe arrangement to provide some
-         # other date to touch if I don't get what seems like
-         # a date in my resulting string?  For now, no.
+         # Do I need a failsafe arrangement to provide some other date to
+         # touch if I don't get what seems like a date in my resulting
+         # string?  For now, no.
          #
-         # I will take one approach if there is an @ in the
-         # "From " line and another (just skip the first word
-         # after "From ") if there is no @ in the line.
+         # I will take one approach if there is an @ in the "From " line
+         # and another (just skip the first word after "From ") if there is
+         # no @ in the line.
          #
-         # If I knew more about Perl I would probably do it in
-         # a more elegant way.
+         # If I knew more about Perl I would probably do it in a more
+         # elegant way.
 
          # Copy the current line into $fromline.
-
          $fromline = $_;
 
-         # Now get rid of the "From ". " =~ s" means substitute.
-         # Find the word "From " at the start of the line and
-         # replace it with nothing.  The nothing is what is
-         # between the second and third slash.
-
+         # Now get rid of the "From ". " =~ s" means substitute. Find the
+         # word "From " at the start of the line and replace it with
+         # nothing.  The nothing is what is between the second and third
+         # slash.
          $fromline =~ s/^From // ;
 
-
-         # Likewise get rid of the email address.
-         # This first section is if we determine there is one
-         # (or more . . . ) "@" characters in the line, which
-         # would normally be the case.
+         # Likewise get rid of the email address. This first section is if
+         # we determine there is one (or more . . . ) "@" characters in the
+         # line, which would normally be the case.
 
          if ($fromline =~ m/@/)
          {
-            # The line has at least one "@" in it, so we assume
-            # this is in the middle of an email address.
+            # The line has at least one "@" in it, so we assume this is in
+            # the middle of an email address.
             #
-            # If the email address had no spaces, then we could
-            # get rid of the whole thing by searching for any number
-            # of non-whitespace characters (\S) contiguously, and
-            # then I think a space.  Subsitute nothing for this.
+            # If the email address had no spaces, then we could get rid of
+            # the whole thing by searching for any number of non-whitespace
+            # characters (\S) contiguously, and then I think a space.
+            # Subsitute nothing for this.
             #
             #    $fromline =~ s/(\S)+ //    ;
             #
@@ -1131,13 +1066,12 @@ sub convert
 
             $fromline =~ s/@//;
          }
-         # If there was an "@" in the line, then we have now
-         # removed the first one (lets hope there aren't more!)
-         # and everything which preceded it.
+         # If there was an "@" in the line, then we have now removed the
+         # first one (lets hope there aren't more!) and everything which
+         # preceded it.
          #
-         # we now remove either something like
-         # '(foo bar)'. eg. '(no mail address)',
-         # or everything after the '@' up to the trailing
+         # we now remove either something like '(foo bar)'. eg. '(no mail
+         # address)', or everything after the '@' up to the trailing
          # timezone
          #
          # FIXME: all those regexp should be combined to just one single one
@@ -1170,26 +1104,23 @@ sub convert
          && (! /^From /)
       )
       {
-         # Now we are reading the header lines after the "From " line.
-         # Keep looking for the blank line which indicates the end of the
+         # Now we are reading the header lines after the "From " line. Keep
+         # looking for the blank line which indicates the end of the
          # headers.
 
 
-         # ".=" means append the current line to the $headers
-         # variable.
+         # ".=" means append the current line to the $headers variable.
          #
-         # For some reason, I was getting two blank lines
-         # at the end of the headers, rather than one,
-         # so I decided not to read in the blank line
-         # which terminates the headers.
+         # For some reason, I was getting two blank lines at the end of the
+         # headers, rather than one, so I decided not to read in the blank
+         # line which terminates the headers.
          #
-         # Delete the "unless ($_ eq "\n")" to get rid
-         # of this kludge.
+         # Delete the "unless ($_ eq "\n")" to get rid of this kludge.
 
          $headers .= $_ unless ($_ eq "\n");
 
-         # Now scan the line for various status flags
-         # and to fine the Subject line.
+         # Now scan the line for various status flags and to fine the
+         # Subject line.
 
          $flags  .= $1 if /^Status: ([A-Z]+)/;
          $flags  .= $1 if /^X-Status: ([A-Z]+)/;
@@ -1204,16 +1135,15 @@ sub convert
             $b = pack("H4", $1); #pack it as 4 digit hex (0x0000)
             $b = unpack("B32", $b); #unpack into bit string
 
-            # "usually" only the right most six bits are used
-            # however, I have come across a seventh bit in
-            # about 15 (out of 10,000) messages with this bit
-            # activated.
-            # I have not found any documentation in the source.
-            # If you find out what it does, please let me know.
+            # "usually" only the right most six bits are used however, I
+            # have come across a seventh bit in about 15 (out of 10,000)
+            # messages with this bit activated. I have not found any
+            # documentation in the source. If you find out what it does,
+            # please let me know.
 
             # Notes:
-            #   Evolution 1.4 does mark forwarded messages.
-            #   The sixth bit is to denote an attachment
+            #   Evolution 1.4 does mark forwarded messages. The sixth bit
+            #   is to denote an attachment
 
             $flags .= 'A' if($b =~ /[01]{15}1/); #replied
             $flags .= 'D' if($b =~ /[01]{14}1[01]{1}/); #deleted
@@ -1227,14 +1157,13 @@ sub convert
             $contentlength = $1 if /^Content-Length: (\d+)$/;
          }
 
-         # Now look out for the end of the headers - a blank
-         # line.  When we find it, create the file name and
-         # analyse the Subject line.
+         # Now look out for the end of the headers - a blank line.  When we
+         # find it, create the file name and analyse the Subject line.
 
          if ($_ eq "\n")
          {
-            # We are at the end of the headers.  Set the
-            # $inheaders flag back to 0.
+            # We are at the end of the headers.  Set the $inheaders flag
+            # back to 0.
 
             $inheaders = 0;
 
@@ -1248,30 +1177,25 @@ sub convert
             #
             #   $messagefn = "cur/$unique.$messagecount.mbox:2,";
             #
-            # This would create names with $messagecount values of
-            # 1, 2, etc.  But for neatness when looking at a
-            # directory of such messages, sorted by filename,
-            # I want to have leading zeroes on message count, so
-            # that they would be 000001 etc.  This makes them
-            # appear in message order rather than 1 being after
-            # 19 etc.  So this is good for up to 999,999 messages
-            # in a mailbox.  It is a cosmetic matter for a person
-            # looking into the Maildir directory manually.
-            # To do this, use sprintf instead with "%06d" for
-            # 6 characters of zero-padding:
+            # This would create names with $messagecount values of 1, 2,
+            # etc.  But for neatness when looking at a directory of such
+            # messages, sorted by filename, I want to have leading zeroes
+            # on message count, so that they would be 000001 etc.  This
+            # makes them appear in message order rather than 1 being after
+            # 19 etc.  So this is good for up to 999,999 messages in a
+            # mailbox.  It is a cosmetic matter for a person looking into
+            # the Maildir directory manually. To do this, use sprintf
+            # instead with "%06d" for 6 characters of zero-padding:
 
             $messagefn = sprintf ("cur/%d.%06d.mbox:2,", $unique, $messagecount) ;
 
-
-            # Append flag characters to the end of the
-            # filename, according to flag characters
-            # collected from the message headers
+            # Append flag characters to the end of the filename, according
+            # to flag characters collected from the message headers
 
             $messagefn .= 'F' if $flags =~ /F/; # Flagged.
             $messagefn .= 'R' if $flags =~ /A/; # Replied to.
             $messagefn .= 'S' if $flags =~ /R/; # Seen or Read.
             $messagefn .= 'T' if $flags =~ /D/; # Tagged for deletion.
-
 
             # Opens filename $messagefn for output (>) with filehandle OUT.
 
@@ -1281,28 +1205,24 @@ sub convert
 
             $messagecount++;
 
-            # Only for the first message,
-            # check to see if it is a dummy.
-            # Delete the message file we
-            # just created if it was for the
-            # dummy message at the start
-            # of the Mbox.
+            # Only for the first message, check to see if it is a dummy.
+            # Delete the message file we just created if it was for the
+            # dummy message at the start of the Mbox.
             #
-            # Add search terms as required.
-            # The last 2 lines are for rent.
+            # Add search terms as required. The last 2 lines are for rent.
             #
-            # "m" means match the regular expression,
-            # but we can do without it.
+            # "m" means match the regular expression, but we can do without
+            # it.
             #
-            # Do I need to escape the ' in "DON'T"?
-            # I didn't in the original version.
+            # Do I need to escape the ' in "DON'T"? I didn't in the
+            # original version.
 
             if (   (($messagecount == 1) && defined($subject))
                && ($subject =~ m/^DON'T DELETE THIS MESSAGE -- FOLDER INTERNAL DATA/)
             )
             {
-               # Stash the file name of the dummy message so we
-               # can delete it later.
+               # Stash the file name of the dummy message so we can delete
+               # it later.
 
                $deletedummy = "$messagefn";
             }
@@ -1311,14 +1231,13 @@ sub convert
 
             print OUT "$headers";
 
-
             # Clear $headers and $flags ready for the next message.
 
             $headers = '';
             $flags = '';
 
-            # End of processing the headers once we found the
-            # blank line which terminated them
+            # End of processing the headers once we found the blank line
+            # which terminated them
          }
 
          # End of dealing with the headers.
@@ -1330,13 +1249,11 @@ sub convert
 
          # We are now processing the message body.
          #
-         # Now we have passed the headers to the
-         # output file, we scan until the while
-         # loop finds another "From " line.
+         # Now we have passed the headers to the output file, we scan until
+         # the while loop finds another "From " line.
 
-         # Decrement our content length if we're
-         # using it to find the end of the message
-         # body
+         # Decrement our content length if we're using it to find the end
+         # of the message body
 
          if (defined $contentlength) {
 
@@ -1344,18 +1261,15 @@ sub convert
 
             $contentlength -= length($_);
 
-            # The proper end for a message with Content-Length
-            # specified is the $contentlength variable should
-            # be exactly -1 and we should be on a bare
-            # newline.  Note that the bare newline is not
-            # printed to the end of the current message as
-            # it's actually a message separator in the mbox
-            # format rather than part of the message.  The
-            # next line _should_ be a From_ line, but just in
-            # case the Content-Length header is incorrect
-            # (e.g. a corrupt mailbox), we just continue
-            # putting lines into the current message until we
-            # see the next From_ line.
+            # The proper end for a message with Content-Length specified is
+            # the $contentlength variable should be exactly -1 and we
+            # should be on a bare newline.  Note that the bare newline is
+            # not printed to the end of the current message as it's
+            # actually a message separator in the mbox format rather than
+            # part of the message.  The next line _should_ be a From_ line,
+            # but just in case the Content-Length header is incorrect (e.g.
+            # a corrupt mailbox), we just continue putting lines into the
+            # current message until we see the next From_ line.
 
             if ($contentlength < 0) {
                if ($contentlength == -1 && $_ eq "\n") {
@@ -1367,50 +1281,39 @@ sub convert
          }
 
          #
-         # We want to copy every part of the message
-         # body to the output file, except for the
-         # quoted ">From " lines, which was the
-         # way the IMAP server encoded body lines
-         # starting with "From ".
+         # We want to copy every part of the message body to the output
+         # file, except for the quoted ">From " lines, which was the way
+         # the IMAP server encoded body lines starting with "From ".
          #
-         # Pattern matching Perl majik to
-         # get rid of an Mbox quoted From.
+         # Pattern matching Perl majik to get rid of an Mbox quoted From.
          #
-         # This works on the default variable "$_" which
-         # contains the text from the Mbox mailbox - I
-         # guess this is the case because of our
-         # (open(MBOX ....) line above, which did not
-         # assign this to anything else, so it would go
-         # to the default variable.  This enables
-         # inscrutably terse Perlisms to follow.
+         # This works on the default variable "$_" which contains the text
+         # from the Mbox mailbox - I guess this is the case because of our
+         # (open(MBOX ....) line above, which did not assign this to
+         # anything else, so it would go to the default variable.  This
+         # enables inscrutably terse Perlisms to follow.
          #
-         # "s" means "Subsitute" and it looks for any
-         # occurrence of ">From" starting at the start
-         # of the line.  When it finds this, it replaces
-         # it with "From".
+         # "s" means "Subsitute" and it looks for any occurrence of ">From"
+         # starting at the start of the line.  When it finds this, it
+         # replaces it with "From".
          #
-         # So this finds all instances in the Mbox message
-         # where the original line started with the word
-         # "From" but was converted to ">From" in order to
-         # not be mistaken for the "From ..." line which
-         # is used to demark each message in the Mbox.
-         # This was was a destructive conversion because
-         # any message which originally had ">From" at the
-         # start of the line, before being put into the
+         # So this finds all instances in the Mbox message where the
+         # original line started with the word "From" but was converted to
+         # ">From" in order to not be mistaken for the "From ..." line
+         # which is used to demark each message in the Mbox. This was was a
+         # destructive conversion because any message which originally had
+         # ">From" at the start of the line, before being put into the
          # Mbox, will now have that line without the ">".
 
          s/^>From /From /;
 
-         # Glorious tersness here.  Thanks Simon for
-         # explaining this.
+         # Glorious tersness here.  Thanks Simon for explaining this.
          #
-         # "print OUT" means print the default variable to
-         # the file of file handle OUT.  This is where
-         # the bulk of the message text is written to
-         # the output file.
+         # "print OUT" means print the default variable to the file of file
+         # handle OUT.  This is where the bulk of the message text is
+         # written to the output file.
 
          print OUT or die("Fatal: unable to write to new message to $messagefn");
-
 
          # End of the if statement dealing with message body.
       }
@@ -1423,9 +1326,9 @@ sub convert
 
    close(MBOX);
 
-   # Close the output file, and duplicate the code
-   # from the start of the while loop which touches
-   # the date-time of the most recent message file.
+   # Close the output file, and duplicate the code from the start of the
+   # while loop which touches the date-time of the most recent message
+   # file.
 
    close(OUT);
    if ($messagefn ne '') {
@@ -1437,11 +1340,8 @@ sub convert
       utime $t, $t, $messagefn;
    }
 
-   # After all the messages have been
-   # converted, check to see if the
-   # first one was a dummy.
-   # if so, delete it and make
-   # the message count one less.
+   # After all the messages have been converted, check to see if the first
+   # one was a dummy. if so, delete it and make the message count one less.
 
    if ($deletedummy ne "")
    {
