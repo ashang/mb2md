@@ -1027,6 +1027,10 @@ sub convert
 
             close (OUT);
             if ($messagefn ne '') {
+# GAN FIX
+               $receivedate =~ s/.*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/\1/;
+               print "Checking date $receivedate\n";
+# GAN FIX
                my $t = str2time($receivedate);
                utime $t, $t, $messagefn;
             }
@@ -1425,6 +1429,10 @@ sub convert
 
    close(OUT);
    if ($messagefn ne '') {
+# GAN FIX
+      $receivedate =~ s/.*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/\1/;
+      print "Checking date $receivedate\n";
+# GAN FIX
       my $t = str2time($receivedate);
       utime $t, $t, $messagefn;
    }
